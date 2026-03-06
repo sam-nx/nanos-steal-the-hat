@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Boogaloo&display=swap');
+/* @import './base.css'; */
+@import "tailwindcss";
+
+/* @theme {
+  --breakpoint-3xl: 120rem;
+} */
+
+@layer utilities {
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    @apply appearance-none;
+  }
+}
+
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) var(--color-background);
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 4px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background-color: var(--color-background);
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  overflow-y: hidden;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.text-zendots {
+  font-family: "Zen Dots", sans-serif;
+  font-style: normal;
+}
+
+.text-luckiest {
+  font-family: "Luckiest Guy", cursive;
+  font-style: normal;
+}
+
+.text-boogaloo {
+  font-family: "Boogaloo", sans-serif;
+  font-style: normal;
+}
+
+.text-arial {
+  font-family: "Arial", sans-serif;
+  font-style: normal;
+}
+
+.text-2xs {
+  font-size: .6rem;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
