@@ -1,4 +1,4 @@
----@class STHCharacter
+---@class STHCharacter: Character
 STHCharacter = Character.Inherit("STHCharacter")
 
 ---@return boolean

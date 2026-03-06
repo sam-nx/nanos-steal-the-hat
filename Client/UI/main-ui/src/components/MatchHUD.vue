@@ -1,97 +1,45 @@
 <script setup>
 	import * as RemixIcon from "@remixicon/vue";
-	import { ref } from "vue";
+	import { ref, shallowRef } from "vue";
+	import { formatCountdownTime } from "@/utils/time";
 
-	const tNotifications = [
-		[
-			{
-				sText: "QuenK",
-				sClass: "text-orange-400 font-bold"
-			},
-			{
-				sText: "was knocked down by",
-				sClass: "text-white/80"
-			},
-			{
-				sText: "SamNx",
-				sClass: "text-blue-400 font-bold"
-			},
-		],
-		[
-			{
-				sText: "SamNx",
-				sClass: "text-orange-400 font-bold"
-			},
-			{
-				sText: "stole the hat!",
-				sClass: "text-white/80"
-			}
-		],
-		[
-			{
-				sText: "Miaou",
-				sClass: "text-green-500 font-bold"
-			},
-			{
-				sText: "joined the game!",
-				sClass: "text-white/80"
-			}
-		],
-	];
-
-	const tLeaderboard = [
-		{
-			sName: "SamNx",
-			nScore: 3187,
-			bHasHat: true
-		},
-		{
-			sName: "QuenK",
-			nScore: 3045,
-			bHasHat: false
-		},
-		{
-			sName: "Miaou",
-			nScore: 2965,
-			bHasHat: false
-		},
-		{
-			sName: "Doggy Doggo",
-			nScore: 2875,
-			bHasHat: false
-		},
-		{
-			sName: "Horsy Horse",
-			nScore: 2635,
-			bHasHat: false
-		},
-		{
-			sName: "Ducky Duck",
-			nScore: 2301,
-			bHasHat: false
-		},
-		{
-			sName: "Mickey Mouse",
-			nScore: 2289,
-			bHasHat: false
-		},
-		{
-			sName: "Wild Goose",
-			nScore: 2064,
-			bHasHat: false,
-			bLocalPlayer: true
-		},
-		{
-			sName: "No more inspiration",
-			nScore: 1923,
-			bHasHat: false
-		},
-		{
-			sName: "Big noob",
-			nScore: 812,
-			bHasHat: false
-		},
-	]
+	// const tNotifications = [
+	// 	[
+	// 		{
+	// 			sText: "QuenK",
+	// 			sClass: "text-orange-400 font-bold"
+	// 		},
+	// 		{
+	// 			sText: "was knocked down by",
+	// 			sClass: "text-white/80"
+	// 		},
+	// 		{
+	// 			sText: "SamNx",
+	// 			sClass: "text-blue-400 font-bold"
+	// 		},
+	// 	],
+	// 	[
+	// 		{
+	// 			sText: "SamNx",
+	// 			sClass: "text-orange-400 font-bold"
+	// 		},
+	// 		{
+	// 			sText: "stole the hat!",
+	// 			sClass: "text-white/80"
+	// 		}
+	// 	],
+	// 	[
+	// 		{
+	// 			sText: "Miaou",
+	// 			sClass: "text-green-500 font-bold"
+	// 		},
+	// 		{
+	// 			sText: "joined the game!",
+	// 			sClass: "text-white/80"
+	// 		}
+	// 	],
+	// ];
+	const tNotifications = ref([]);
 
 	const tPerks = [
 		{
@@ -134,7 +82,58 @@
 		}
 	};
 
+	const tLBLocalPlayer = ref(null);
+
 	const bLeaderboardOpen = ref(false);
+
+	const tCharacterData = ref({});
+
+	const bScoreAdd = ref(false);
+	const nScoreAddValue = ref("");
+
+	const bShowNotifications = ref(false);
+	const nShowNotifTimer = ref(0);
+
+	const addScore = (nScore) => {
+		bScoreAdd.value = true;
+		nScoreAddValue.value = (nScore >= 0 ? '+' : '') + nScore;
+		setTimeout(() => {bScoreAdd.value = false}, 990);
+	}
+
+	// Events
+
+	Events.Subscribe("SNX::STH::MatchHUD::SyncData", function (tData) {
+		const tSorted = tData.tLeaderboard.sort((a, b) => (b.nScore - a.nScore));
+		for (let nIndex = 0; nIndex < tSorted.length; nIndex++) {
+			if (tSorted[nIndex].bLocalPlayer) {
+				let tPlayer = tSorted[nIndex];
+				tPlayer.nIndex = nIndex;
+				tLBLocalPlayer.value = tPlayer;
+				break;
+			}
+		}
+
+		tData.tLeaderboard = tSorted;
+		tCharacterData.value = tData;
+    });
+
+	Events.Subscribe("SNX::STH::MatchHUD::AddScore", function (nScore) {
+		addScore(nScore);
+    });
+
+	Events.Subscribe("SNX::STH::MatchHUD::ToggleLeaderboard", function (bState) {
+		bLeaderboardOpen.value = bState;
+    });
+
+	Events.Subscribe("SNX::STH::MatchHUD::AddNotification", function (tData) {
+		while (tNotifications.value.length >= 4) {
+			tNotifications.value.shift();
+		}
+		tNotifications.value.push(tData);
+		clearTimeout(nShowNotifTimer.value);
+		bShowNotifications.value = true;
+		nShowNotifTimer.value = setTimeout(() => {bShowNotifications.value = false}, 3000);
+    });
 </script>
 
 <template>
@@ -150,7 +149,7 @@
 						<span class="text-2xl text-boogaloo">LEADERBOARD</span>
 						<div class="flex items-center rounded-xl border-2 border-orange-400 bg-[#222] px-2 py-1">
 							<RemixIcon.RiTimerLine class="w-4 h-4 text-orange-400 mr-2" />
-							<span class="font-bold">02:45</span>
+							<span class="font-bold">{{ formatCountdownTime(tCharacterData?.nTimeLeft || 0) }}</span>
 						</div>
 					</div>
 					<div class="border-2 border-orange-400 grid grid-rows-[auto_1fr] rounded-xl overflow-hidden bg-orange-400/5">
@@ -161,7 +160,7 @@
 							<span class="font-bold text-sm text-orange-400">SCORE</span>
 						</div>
 						<div class="overflow-y-scroll no-scrollbar">
-							<div v-for="(tPlayer, nIndex) in tLeaderboard" :key="nIndex" class="grid grid-cols-[1fr_3fr_1fr_1fr] items-center px-4 py-4 border-b-2 border-orange-400/10">
+							<div v-for="(tPlayer, nIndex) in tCharacterData?.tLeaderboard || []" :key="nIndex" class="grid grid-cols-[1fr_3fr_1fr_1fr] items-center px-4 py-4 border-b-2 border-orange-400/10">
 								<span class="font-bold text-xs" :class="getRankColor(nIndex + 1)">{{ nIndex + 1 }}{{ podiumSuffix(nIndex + 1) }}</span>
 								<span class="font-bold text-sm">{{ tPlayer.sName }} <span v-if="tPlayer.bLocalPlayer" class="text-yellow-500">(YOU)</span></span>
 								<span class="font-bold w-fit rounded-full flex items-center" :class="tPlayer.bHasHat ? 'px-2 py-1 bg-orange-400/30 border-2 border-orange-400 text-2xs' : 'text-blue-200 text-xs'">
@@ -189,21 +188,21 @@
 				</div>
 			</div>
 		</div>
-		<div class="absolute top-6 left-6 bg-[#111] border-2 border-orange-400 rounded-xl flex flex-col overflow-hidden">
+		<div class="absolute top-6 left-6 bg-[#111] border-2 border-orange-400 rounded-xl flex flex-col overflow-hidden w-64">
 			<div class="w-full px-2 py-2 bg-orange-400/30 flex items-center gap-1">
 				<RemixIcon.RiBarChart2Line class="w-4 h-4 -mt-px text-orange-400" />
 				<span class="text-orange-400 font-bold text-2xs">TOP PLAYERS</span>
 			</div>
-			<div class="flex flex-col w-full px-2 py-1 gap-1">
-				<div v-for="(tPlayer, nIndex) in tLeaderboard.slice(0, 5)" :key="nIndex" class="grid grid-cols-[auto_1fr_auto] gap-1 items-center px-2 py-px rounded-full">
+			<div class="flex flex-col w-full p-1 gap-1">
+				<div v-for="(tPlayer, nIndex) in (tCharacterData?.tLeaderboard || []).slice(0, 5)" :key="nIndex" class="grid grid-cols-[1.5rem_1fr_auto] gap-1 items-center px-2 py-px rounded-full" :class="tPlayer.bLocalPlayer ? 'bg-orange-400' : ''">
 					<span class="text-white/80 font-bold text-2xs">{{ nIndex + 1 }}{{ podiumSuffix(nIndex + 1) }}</span>
-					<span class="font-bold text-xs">{{ tPlayer.sName }}</span>
+					<span class="font-bold text-xs truncate">{{ tPlayer.sName }}</span>
 					<span class="text-white/80 font-bold text-2xs ml-4">{{ tPlayer.nScore }}</span>
 				</div>
-				<div class="grid grid-cols-[auto_1fr_auto] gap-1 items-center px-2 py-px rounded-full bg-orange-400">
-					<span class="text-white/80 font-bold text-2xs">8th</span>
-					<span class="font-bold text-xs">LocalPlayer</span>
-					<span class="text-white/80 font-bold text-2xs ml-4">2064</span>
+				<div v-if="tLBLocalPlayer?.nIndex >= 5" class="grid grid-cols-[1.5rem_1fr_auto] gap-1 items-center px-2 py-px rounded-full bg-orange-400">
+					<span class="text-white/80 font-bold text-2xs">{{ tLBLocalPlayer?.nIndex + 1 }}{{ podiumSuffix(tLBLocalPlayer?.nIndex + 1) }}</span>
+					<span class="font-bold text-xs truncate">{{ tLBLocalPlayer?.sName || "???" }}</span>
+					<span class="text-white/80 font-bold text-2xs ml-4">{{ tLBLocalPlayer?.nScore || 0 }}</span>
 				</div>
 			</div>
 		</div>
@@ -218,15 +217,15 @@
 			</div>
 			<div class="bg-[#111] px-10 py-2 rounded-xl border-2 border-orange-400 flex flex-col items-center mb-2">
 				<span class="text-orange-400 text-sm font-semibold">YOU HAVE THE HAT !</span>
-				<span class="text-3xl font-bold">02:45</span>
+				<span class="text-3xl font-bold">{{ formatCountdownTime(tCharacterData?.nTimeLeft || 0) }}</span>
 			</div>
 		</div>
 		<div class=""></div>
 		<div class="grid grid-cols-[1fr_auto_1fr] gap-4 items-end p-4">
 			<div class="flex flex-col gap-4">
-				<div class="flex flex-col w-fit gap-1">
+				<div class="flex flex-col w-fit gap-1" :class="bShowNotifications ? '' : 'fade-down'">
 					<div v-for="(tNotification, nIndex) in tNotifications" :key="nIndex" class="bg-black/50 rounded-lg px-2 flex items-center gap-[.1rem] px-2 py-1">
-						<span class="text-2xs" v-for="(tPart, nIndex) in tNotification" :key="nIndex" :class="tPart.sClass">{{ tPart.sText }}</span>
+						<span class="text-2xs" v-for="(tPart, nIndex) in tNotification" :key="nIndex" :style="{ color: tPart.sColor }" :class="tPart.bBold ? 'font-bold' : ''">{{ tPart.sText }}</span>
 					</div>
 				</div>
 
@@ -237,10 +236,10 @@
 					<div class="flex flex-col">
 						<div class="flex items-center justify-between text-xs font-semibold mb-2">
 							<span class="text-orange-400">HEALTH</span>
-							<span>80/100</span>
+							<span>{{ tCharacterData?.nHealth || 0 }}/{{ tCharacterData?.nMaxHealth || 0 }}</span>
 						</div>
 						<div class="w-64 h-4 rounded-full bg-orange-900">
-							<div class="h-full w-4/5 bg-orange-400 rounded-full transition-all duration-200"></div>
+							<div class="h-full bg-orange-400 rounded-full transition-all duration-200" :style="{ width: `${(Math.floor(tCharacterData?.nHealth || 0) / (tCharacterData?.nMaxHealth || 1) * 100)}%` }"></div>
 						</div>
 					</div>
 				</div>
@@ -256,10 +255,11 @@
 				</div>
 			</div>
 			<div class="flex flex-col items-end">
-				<div class="w-30 h-30 bg-[#111] rounded-full border-4 border-orange-400 flex flex-col items-center justify-center shadow-[0px_8px_0px_0px_rgba(150,_85,_12,_1)] relative">
-					<span class="absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#111] border-3 border-orange-400 text-boogaloo whitespace-nowrap px-2 rounded-xl animate-bounce">NEW PR !</span>
+				<div class="w-30 h-30 bg-[#111] rounded-full border-4 border-orange-400 flex flex-col items-center justify-center shadow-[0px_8px_0px_0px_rgba(150,85,12,1)] relative">
+					<span v-if="bScoreAdd" class="absolute -top-2 -left-2 text-luckiest text-3xl text-orange-400 text-shadow-[3px_3px_0px_#111] z-10 animate-ping">{{ nScoreAddValue }}</span>
+					<span v-if="tCharacterData?.nScore > tCharacterData?.nPRScore" class="absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#111] border-3 border-orange-400 text-boogaloo whitespace-nowrap px-2 rounded-xl animate-bounce">NEW PR !</span>
 					<span class="text-orange-400 font-bold text-2xs">CURRENT SCORE</span>
-					<span class="text-4xl text-luckiest">2,064</span>
+					<span class="text-4xl text-luckiest">{{ tCharacterData?.nScore || 0 }}</span>
 				</div>
 			</div>
 		</div>
@@ -267,4 +267,16 @@
 </template>
 
 <style scoped>
+	.fade-down {
+		animation: fade-down 3s linear forwards;
+	}
+
+	@keyframes fade-down {
+		0% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
 </style>
