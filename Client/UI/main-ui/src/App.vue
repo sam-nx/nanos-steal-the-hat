@@ -3,6 +3,7 @@
   import WaitingHUD from './components/WaitingHUD.vue';
   import PrepHUD from './components/PrepHUD.vue';
   import LeaderboardHUD from './components/LeaderboardHUD.vue';
+  import iPhone from './components/iPhone.vue';
 </script>
 
 <template>
@@ -11,6 +12,7 @@
     <!-- <PrepHUD /> -->
     <MatchHUD />
     <!-- <LeaderboardHUD /> -->
+    <!-- <iPhone /> -->
   </div>
 </template>
 

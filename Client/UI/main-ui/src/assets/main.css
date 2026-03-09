@@ -80,3 +80,98 @@
   scrollbar-width: none;
   /* Firefox */
 }
+
+/* Poly iPhone */
+
+@font-face {
+  font-family: "SF Pro";
+  src: url("./fonts/sf-pro/SF-Pro.ttf");
+}
+
+@font-face {
+  font-family: "SF Pro Rounded";
+  src: url("./fonts/sf-pro/SF-Pro-Rounded-Regular.otf");
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("./fonts/sf-pro/SF-Pro-Display-Regular.otf");
+}
+
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/sf-pro/SF-Pro-Text-Ultralight.otf");
+  font-weight: 100;
+}
+
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/sf-pro/SF-Pro-Text-Thin.otf");
+  font-weight: 200;
+}
+
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/sf-pro/SF-Pro-Text-Light.otf");
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/sf-pro/SF-Pro-Text-Regular.otf");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/sf-pro/SF-Pro-Text-Medium.otf");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/sf-pro/SF-Pro-Text-Semibold.otf");
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/sf-pro/SF-Pro-Text-Bold.otf");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/sf-pro/SF-Pro-Text-Heavy.otf");
+  font-weight: 800;
+}
+
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/sf-pro/SF-Pro-Text-Black.otf");
+  font-weight: 900;
+}
+
+@theme {
+  --container-4xs: 14rem;
+  --container-5xs: 12rem;
+  --container-6xs: 10rem;
+  --container-7xs: 8rem;
+  --container-8xs: 6rem;
+}
+
+.text-sfpro {
+  font-family: "SF Pro";
+}
+
+.text-sfpro-rounded {
+  font-family: "SF Pro Rounded";
+}
+
+.text-sfpro-display {
+  font-family: "SF Pro Display";
+}
+
+.text-sfpro-text {
+  font-family: "SF Pro Display";
+}

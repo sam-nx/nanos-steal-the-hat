@@ -7,11 +7,13 @@ function STHCharacter:Constructor(tLocation, tRotation, sMesh)
 	self:SetValue("SNX::STH::bHasHat", false, true)
 	self:SetValue("SNX::STH::nScore", 0, true)
 	self:SetValue("SNX::STH::nPRScore", 0, true)
+	self:SetValue("SNX::STH::nHatScoreInterval", 0)
 end
 
 ---@param bStuned boolean
 function STHCharacter:SetStuned(bStuned)
 	self:SetValue("SNX::STH::bStuned", bStuned, true)
+	self:SetRagdollMode(bStuned)
 end
 
 ---@param bHasHat boolean
@@ -36,8 +38,6 @@ function STHCharacter:SetPRScore(nPRScore)
 end
 
 function STHCharacter:AttachHat()
-	if (self:GetHasHat()) then return end
-
 	local eHat = self:GetValue("SNX::STH::eHat")
 	if (eHat and eHat:IsValid()) then eHat:Destroy() end
 
@@ -62,3 +62,80 @@ function STHCharacter:DetachHat()
 	if (not eHat or not eHat:IsValid()) then return end
 	eHat:Destroy()
 end
+
+function STHCharacter:GiveHat()
+	self:SetHasHat(true)
+	self:AttachHat()
+	local nHatInterval = self:GetValue("SNX::STH::nHatScoreInterval", 0)
+	Timer.ClearInterval(nHatInterval)
+	nHatInterval = Timer.SetInterval(function()
+		if (not self or not self:IsValid() or not self:GetPlayer() or not self:GetHasHat()) then
+			Timer.ClearInterval(self:GetValue("SNX::STH::nHatScoreInterval", 0))
+		else
+			self:AddScore(50)
+		end
+	end, 1500)
+	self:SetValue("SNX::STH::nHatScoreInterval", nHatInterval)
+end
+
+function STHCharacter:RemoveHat()
+	self:SetHasHat(false)
+	self:DetachHat()
+	local nHatInterval = self:GetValue("SNX::STH::nHatScoreInterval", 0)
+	Timer.ClearInterval(nHatInterval)
+end
+
+---@param eCharacter STHCharacter
+---@param eCauser STHCharacter
+STHCharacter.Subscribe("TakeDamage", function(eCharacter, nDamage, _, _, _, pInstigator, eCauser)
+	if (not eCharacter or not eCharacter:IsValid()) then return end
+	if (not eCauser or not eCauser:IsValid()) then return end
+	if (not eCharacter:IsA(STHCharacter) or not eCauser:IsA(STHCharacter)) then return end
+
+	if (eCharacter:GetHealth() - nDamage <= 1) then
+		if (not eCharacter:GetStuned()) then
+			eCharacter:SetHealth(1)
+			eCharacter:SetStuned(true)
+			Events.Call("SNX::STH::Character::Stun", eCharacter, eCauser, pInstigator)
+		end
+		return (false)
+	end
+	return (true)
+end)
+
+---@param eCharacter STHCharacter
+---@param eCauser STHCharacter
+---@param pInstigator Player
+Events.Subscribe("SNX::STH::Character::Stun", function(eCharacter, eCauser, pInstigator)
+	if (not eCharacter or not eCharacter:IsValid()) then return end
+	if (not eCauser or not eCauser:IsValid()) then return end
+	if (not eCharacter:IsA(STHCharacter) or not eCauser:IsA(STHCharacter)) then return end
+
+	print(eCharacter, "was killed by", (pInstigator and pInstigator:GetName() or "Unknown"), "->", eCauser)
+
+	-- TODO: If the player dies from unknown cause, drop the hat to the ground
+
+	local pPlayer = eCharacter:GetPlayer()
+
+	SNX.StealTheHat:Broadcast({
+		SNX.StealTheHat:FormatText(pPlayer and pPlayer:GetName() or "Unknown", NOTIF_COLORS.orange, true),
+		SNX.StealTheHat:FormatText("was knocked out by", NOTIF_COLORS.gray),
+		SNX.StealTheHat:FormatText(pInstigator:GetName() or "Unknown", NOTIF_COLORS.blue, true)
+	})
+
+	Timer.SetTimeout(function()
+		if (eCharacter and eCharacter:IsValid() and eCharacter:GetStuned()) then
+			eCharacter:SetHealth(eCharacter:GetMaxHealth())
+			eCharacter:SetStuned(false)
+		end
+	end, 3000)
+
+	if (eCharacter:GetHasHat()) then
+		eCharacter:RemoveHat()
+		eCauser:GiveHat()
+		SNX.StealTheHat:Broadcast({
+			SNX.StealTheHat:FormatText(pInstigator:GetName() or "Unknown", NOTIF_COLORS.orange, true),
+			SNX.StealTheHat:FormatText("stole the hat !", NOTIF_COLORS.gray),
+		})
+	end
+end)

@@ -5,29 +5,21 @@ SNX.StealTheHat = SNX.StealTheHat or {}
 local function spawnPlayer(pPlayer)
 	local eCharacter = STHCharacter(Vector(0, 0, 0), Rotator(0, 0, 0), "nanos-world::SK_Male")
 	pPlayer:Possess(eCharacter)
-	eCharacter:AttachHat()
-	Timer.SetTimeout(function()
-		eCharacter:SetRagdollMode(true)
-		eCharacter:DetachHat()
-		SNX.StealTheHat:Broadcast({
-			SNX.StealTheHat:FormatText("SamNx", NOTIF_COLORS.orange, true),
-			SNX.StealTheHat:FormatText("was knocked out by", NOTIF_COLORS.gray),
-			SNX.StealTheHat:FormatText("QuenK", NOTIF_COLORS.blue, true)
-		})
 
-		SNX.StealTheHat:Broadcast({
-			SNX.StealTheHat:FormatText("QuenK", NOTIF_COLORS.orange, true),
-			SNX.StealTheHat:FormatText("stole the hat !", NOTIF_COLORS.gray),
-		})
-	end, 2000)
+	local eTestCharacter = STHCharacter(Vector(100, 0, 0), Rotator(0, 0, 0), "nanos-world::SK_Mannequin")
+	eTestCharacter:GiveHat()
 
-	Timer.SetTimeout(function()
-		eCharacter:SetRagdollMode(false)
-	end, 6000)
+	local ePerk = STHPerk(Vector(300, 0, 100), Rotator(0, 0, 0), "nanos-world::SM_Cube", CollisionType.NoCollision,
+		Color(0, 0, 1))
 
-	Timer.SetInterval(function()
-		eCharacter:AddScore(50)
-	end, 1500)
+	-- Timer.SetTimeout(function()
+	-- 	eCharacter:SetHasHat(false)
+	-- 	eCharacter:DetachHat()
+	-- end, 7000)
+
+	-- Timer.SetInterval(function()
+	-- 	eCharacter:AddScore(50)
+	-- end, 1500)
 end
 
 ---@param pPlayer Player
@@ -42,6 +34,7 @@ Package.Subscribe("Load", function()
 	for _, pPlayer in ipairs(Player.GetAll()) do
 		spawnPlayer(pPlayer)
 	end
+
 end)
 
 Player.Subscribe("Spawn", function(pPlayer)

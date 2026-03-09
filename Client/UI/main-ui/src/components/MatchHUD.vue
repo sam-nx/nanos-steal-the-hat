@@ -219,6 +219,15 @@
 				<span class="text-orange-400 text-sm font-semibold">YOU HAVE THE HAT !</span>
 				<span class="text-3xl font-bold">{{ formatCountdownTime(tCharacterData?.nTimeLeft || 0) }}</span>
 			</div>
+			<div class="bg-[#111] px-4 py-2 border-2 border-blue-400 rounded-xl flex flex-col text-xs gap-1">
+				<div class="flex items-center gap-1">
+					<span class="font-bold">Current perk:</span>
+					<span class="text-blue-400">One Punch Man</span>
+				</div>
+				<div class="w-full h-2 bg-blue-900 rounded-full overflow-hidden">
+					<div class="w-3/4 h-full bg-blue-400 rounded-full"></div>
+				</div>
+			</div>
 		</div>
 		<div class=""></div>
 		<div class="grid grid-cols-[1fr_auto_1fr] gap-4 items-end p-4">
