@@ -9,12 +9,23 @@ local function spawnPlayer(pPlayer)
 	local eTestCharacter = STHCharacter(Vector(100, 0, 0), Rotator(0, 0, 0), "nanos-world::SK_Mannequin")
 	eTestCharacter:GiveHat()
 
-	local ePerk = STHPerk(Vector(300, 0, 100), Rotator(0, 0, 0), "nanos-world::SM_Cube", CollisionType.NoCollision,
+	local ePerk = STHPerkDrop("test_one_punch_man", Vector(300, 0, 100), Rotator(0, 0, 0), "nanos-world::SM_Cube",
+		CollisionType.NoCollision,
 		Color(0, 0, 1))
 
-	-- Timer.SetTimeout(function()
-	-- 	eCharacter:SetHasHat(false)
-	-- 	eCharacter:DetachHat()
+	local ePerk2 = STHPerkDrop("test_one_punch_man", Vector(500, 0, 100), Rotator(0, 0, 0), "nanos-world::SM_Cube",
+		CollisionType.NoCollision,
+		Color(0, 0, 1))
+
+	local ePerk3 = STHPerkDrop("test_one_punch_man", Vector(700, 0, 100), Rotator(0, 0, 0), "nanos-world::SM_Cube",
+		CollisionType.NoCollision,
+		Color(0, 0, 1))
+
+	local ePerk4 = STHPerkDrop("test_one_punch_man", Vector(900, 0, 100), Rotator(0, 0, 0), "nanos-world::SM_Cube",
+		CollisionType.NoCollision,
+		Color(0, 0, 1))
+
+	-- 	eTestCharacter:Destroy()
 	-- end, 7000)
 
 	-- Timer.SetInterval(function()
@@ -34,7 +45,6 @@ Package.Subscribe("Load", function()
 	for _, pPlayer in ipairs(Player.GetAll()) do
 		spawnPlayer(pPlayer)
 	end
-
 end)
 
 Player.Subscribe("Spawn", function(pPlayer)

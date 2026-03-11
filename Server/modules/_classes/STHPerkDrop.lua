@@ -1,9 +1,14 @@
+SNX = SNX or {}
+SNX.StealTheHat = SNX.StealTheHat or {}
+SNX.StealTheHat.Perks = SNX.StealTheHat.Perks or {}
+
+---@param sPerkUID string
 ---@param tLocation Vector
 ---@param tRotation Rotator
 ---@param sMesh string
 ---@param nCollisionType CollisionType
 ---@param tColor Color
-function STHPerk:Constructor(tLocation, tRotation, sMesh, nCollisionType, tColor)
+function STHPerkDrop:Constructor(sPerkUID, tLocation, tRotation, sMesh, nCollisionType, tColor)
 	self.Super:Constructor(tLocation, tRotation, sMesh, nCollisionType)
 	self:SetValue("SNX::STH::sPerk", "", true)
 
@@ -41,12 +46,17 @@ function STHPerk:Constructor(tLocation, tRotation, sMesh, nCollisionType, tColor
 	---@param eEntity STHCharacter
 	eTrigger:Subscribe("BeginOverlap", function(eSelf, eEntity)
 		if (not eEntity or not eEntity:IsValid() or not eEntity:IsA(STHCharacter)) then return end
-		eEntity:SetValue("SNX::STH::Perks::bOnePunchMan", true)
+		local tPerk = SNX.StealTheHat.Perks:GetPerk(sPerkUID)
+		print(sPerkUID, tPerk)
+		if (tPerk) then
+			print("Adding to deck")
+			eEntity:AddToDeck(tPerk)
+		end
 		self:Destroy()
 	end)
 end
 
 ---@param sPerk string
-function STHPerk:SetPerk(sPerk)
+function STHPerkDrop:SetPerk(sPerk)
 	self:SetValue("SNX::STH::sPerk", sPerk, true)
 end

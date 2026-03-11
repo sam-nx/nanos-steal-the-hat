@@ -19,9 +19,11 @@ oCanvas:Subscribe("Update", function(self, nW, nH)
 
 	---@param eCharacter STHCharacter
 	for _, eCharacter in ipairs(STHCharacter.GetAll()) do
-		self:DrawText("Character test", Viewport.ProjectWorldToScreen(eCharacter:GetLocation()) + Vector2D(0, -200))
+		local pPlayer = eCharacter:GetPlayer()
+		self:DrawText(pPlayer and pPlayer:GetName() or "Unknown",
+			Viewport.ProjectWorldToScreen(eCharacter:GetLocation()) + Vector2D(0, -200))
 		self:DrawText(eCharacter:GetHealth() .. "/" .. eCharacter:GetMaxHealth(),
-			Viewport.ProjectWorldToScreen(eCharacter:GetLocation()) + Vector2D(0, -150))
+			Viewport.ProjectWorldToScreen(eCharacter:GetLocation()) + Vector2D(0, -180))
 	end
 end)
 

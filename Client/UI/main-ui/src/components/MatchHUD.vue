@@ -3,58 +3,9 @@
 	import { ref, shallowRef } from "vue";
 	import { formatCountdownTime } from "@/utils/time";
 
-	// const tNotifications = [
-	// 	[
-	// 		{
-	// 			sText: "QuenK",
-	// 			sClass: "text-orange-400 font-bold"
-	// 		},
-	// 		{
-	// 			sText: "was knocked down by",
-	// 			sClass: "text-white/80"
-	// 		},
-	// 		{
-	// 			sText: "SamNx",
-	// 			sClass: "text-blue-400 font-bold"
-	// 		},
-	// 	],
-	// 	[
-	// 		{
-	// 			sText: "SamNx",
-	// 			sClass: "text-orange-400 font-bold"
-	// 		},
-	// 		{
-	// 			sText: "stole the hat!",
-	// 			sClass: "text-white/80"
-	// 		}
-	// 	],
-	// 	[
-	// 		{
-	// 			sText: "Miaou",
-	// 			sClass: "text-green-500 font-bold"
-	// 		},
-	// 		{
-	// 			sText: "joined the game!",
-	// 			sClass: "text-white/80"
-	// 		}
-	// 	],
-	// ];
 	const tNotifications = ref([]);
 
-	const tPerks = [
-		{
-			sIcon: RemixIcon.RiFlashlightFill,
-			sColor: "text-yellow-500"
-		},
-		{
-			sIcon: RemixIcon.RiShieldFill,
-			sColor: "text-blue-400"
-		},
-		{
-			sIcon: RemixIcon.RiMoonClearFill,
-			sColor: "text-blue-200"
-		},
-	];
+	const tPerks = ref([]);
 
 	const podiumSuffix = (nIndex) => {
 		switch (nIndex) {
@@ -114,6 +65,13 @@
 		}
 
 		tData.tLeaderboard = tSorted;
+		if (tData.bShiftDeck) {
+			for (let i = 0; i < 4; i++) {
+				tData.tDeck[i] = tData.tDeck[i + 1];
+				tData.tDeck[i + 1] = null;
+			}
+		}
+		tPerks.value = tData.tDeck;
 		tCharacterData.value = tData;
     });
 
@@ -219,13 +177,13 @@
 				<span class="text-orange-400 text-sm font-semibold">YOU HAVE THE HAT !</span>
 				<span class="text-3xl font-bold">{{ formatCountdownTime(tCharacterData?.nTimeLeft || 0) }}</span>
 			</div>
-			<div class="bg-[#111] px-4 py-2 border-2 border-blue-400 rounded-xl flex flex-col text-xs gap-1">
+			<div v-if="tCharacterData?.tCurrentPerk" class="bg-[#111] px-4 py-2 border-2 border-blue-400 rounded-xl flex flex-col text-xs gap-1">
 				<div class="flex items-center gap-1">
 					<span class="font-bold">Current perk:</span>
-					<span class="text-blue-400">One Punch Man</span>
+					<span class="text-blue-400">{{ tCharacterData?.tCurrentPerk?.__sPerkName }}</span>
 				</div>
 				<div class="w-full h-2 bg-blue-900 rounded-full overflow-hidden">
-					<div class="w-3/4 h-full bg-blue-400 rounded-full"></div>
+					<div class="h-full bg-blue-400 rounded-full transition-all duration-200" :style="{ width: `${(tCharacterData?.nPerkTimeLeft > 0) ? (tCharacterData?.nPerkTimeLeft * 10) : 0}%` }"></div>
 				</div>
 			</div>
 		</div>
@@ -255,10 +213,10 @@
 			</div>
 			<div class="flex justify-center">
 				<div class="flex items-center mb-10 gap-2">
-					<div v-for="(tPerk, nIndex) in tPerks" :key="nIndex" class="w-12 h-12 bg-[#111] border-2 border-orange-400 relative flex items-center justify-center rounded-xl">
-						<component v-if="tPerk.sIcon" :is="tPerk.sIcon" class="w-6 h-6" :class="tPerk.sColor" />
+					<div v-for="nIndex in 3" :key="nIndex" class="w-12 h-12 bg-[#111] border-2 border-orange-400 relative flex items-center justify-center rounded-xl">
+						<component v-if="tPerks[nIndex - 1]" :is="RemixIcon[tPerks[nIndex - 1]?.sPerkIcon]" class="w-6 h-6" :style="{ color: tPerks[nIndex - 1]?.sPerkColor }" />
 						<div class="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#111] border-2 border-orange-400 flex items-center justify-center text-center">
-							<span class="text-2xs">{{ nIndex + 1 }}</span>
+							<span class="text-2xs">{{ nIndex }}</span>
 						</div>
 					</div>
 				</div>

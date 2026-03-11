@@ -1,4 +1,3 @@
-local pLocal = Client.GetLocalPlayer()
 local bLeaderboardOpen = false
 
 local uiMainUI = WebUI(
@@ -10,6 +9,7 @@ local uiMainUI = WebUI(
 )
 
 Timer.SetInterval(function()
+	local pLocal = Client.GetLocalPlayer()
 	---@type STHCharacter
 	local eCharacter = pLocal:GetControlledCharacter()
 	local tLeaderboard = {}
@@ -26,8 +26,6 @@ Timer.SetInterval(function()
 		})
 	end
 
-	local nTest = 0
-
 	for i = 0, 10 do
 		table.insert(tLeaderboard, {
 			sName = "Test " .. i,
@@ -36,6 +34,18 @@ Timer.SetInterval(function()
 		})
 	end
 
+	local tDeck = eCharacter:GetDeck()
+	local tPerk = eCharacter:GetCurrentPerk()
+	if (tPerk and type(tPerk) == "table") then
+		for sKey, xValue in pairs(tPerk) do
+			if (type(xValue) == "function") then
+				tPerk[sKey] = nil
+			end
+		end
+	end
+
+	local nPerkTimeLeft = eCharacter:GetValue("SNX::STH::Perks::nCurrentPerkTimeLeft", 0)
+
 	uiMainUI:CallEvent("SNX::STH::MatchHUD::SyncData", {
 		["nHealth"] = eCharacter:GetHealth(),
 		["nMaxHealth"] = eCharacter:GetMaxHealth(),
@@ -43,6 +53,11 @@ Timer.SetInterval(function()
 		["nPRScore"] = eCharacter:GetPRScore(),
 		["nTimeLeft"] = 72,
 		["tLeaderboard"] = tLeaderboard,
+		["tDeck"] = tDeck,
+		["bShiftDeck"] = ((tDeck[1] and not tDeck[2] and tDeck[3]) or (not tDeck[1] and (tDeck[2] or tDeck[3]))) and true or
+			false,
+		["tCurrentPerk"] = tPerk,
+		["nPerkTimeLeft"] = math.floor((nPerkTimeLeft - Client.GetTime()) / 10) / 100
 	})
 end, 100)
 

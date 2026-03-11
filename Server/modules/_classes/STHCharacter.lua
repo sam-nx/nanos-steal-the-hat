@@ -49,7 +49,7 @@ function STHCharacter:AttachHat()
 		false,
 		GrabMode.Disabled
 	)
-	eHat:AttachTo(self, AttachmentRule.SnapToTarget, "head")
+	eHat:AttachTo(self, AttachmentRule.SnapToTarget, "head", 0)
 	eHat:SetScale(Vector(0.3, 0.3, 0.3))
 	eHat:SetRelativeLocation(Vector(30, 3, 0))
 	eHat:SetRelativeRotation(Rotator(-90, 0, 0))
@@ -85,6 +85,33 @@ function STHCharacter:RemoveHat()
 	Timer.ClearInterval(nHatInterval)
 end
 
+---@param tDeck STHPerk[]
+function STHCharacter:SetDeck(tDeck)
+	return (self:SetValue("SNX::STH::Deck::tDeck", tDeck, true))
+end
+
+---@param tPerk STHPerk
+---@return boolean
+function STHCharacter:AddToDeck(tPerk)
+	local bAdded = false
+	if (not tPerk) then return (false) end
+	local tDeck = self:GetDeck()
+	for nIndex = 1, 3 do
+		if (not tDeck[nIndex]) then
+			tDeck[nIndex] = {
+				sPerkUID = tPerk.__sPerkUID,
+				sPerkName = tPerk.__sPerkName,
+				sPerkIcon = tPerk.__sUIIcon,
+				sPerkColor = tPerk.__sUIColor,
+			}
+			bAdded = true
+			break
+		end
+	end
+	self:SetDeck(tDeck)
+	return (bAdded)
+end
+
 ---@param eCharacter STHCharacter
 ---@param eCauser STHCharacter
 STHCharacter.Subscribe("TakeDamage", function(eCharacter, nDamage, _, _, _, pInstigator, eCauser)
@@ -110,8 +137,6 @@ Events.Subscribe("SNX::STH::Character::Stun", function(eCharacter, eCauser, pIns
 	if (not eCharacter or not eCharacter:IsValid()) then return end
 	if (not eCauser or not eCauser:IsValid()) then return end
 	if (not eCharacter:IsA(STHCharacter) or not eCauser:IsA(STHCharacter)) then return end
-
-	print(eCharacter, "was killed by", (pInstigator and pInstigator:GetName() or "Unknown"), "->", eCauser)
 
 	-- TODO: If the player dies from unknown cause, drop the hat to the ground
 
