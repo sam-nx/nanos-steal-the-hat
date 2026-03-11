@@ -2,6 +2,6 @@
 !.vscode/extensions.json
 .env*
 node_modules
-Client/UI/main-ui/src/components/iPhone*
-Client/UI/main-ui/src/assets/fonts/sf-pro
-Client/UI/main-ui/public/iphone*
+Client/UI/ui-dev
+Client/UI/dist/iphone*
+Client/UI/dist/assets/SF-Pro*

@@ -69,7 +69,8 @@ function STHCharacter:GiveHat()
 	local nHatInterval = self:GetValue("SNX::STH::nHatScoreInterval", 0)
 	Timer.ClearInterval(nHatInterval)
 	nHatInterval = Timer.SetInterval(function()
-		if (not self or not self:IsValid() or not self:GetPlayer() or not self:GetHasHat()) then
+		if (not self or not self:IsValid()) then return end
+		if (not self:GetPlayer() or not self:GetHasHat()) then
 			Timer.ClearInterval(self:GetValue("SNX::STH::nHatScoreInterval", 0))
 		else
 			self:AddScore(50)
@@ -147,6 +148,8 @@ Events.Subscribe("SNX::STH::Character::Stun", function(eCharacter, eCauser, pIns
 		SNX.StealTheHat:FormatText("was knocked out by", NOTIF_COLORS.gray),
 		SNX.StealTheHat:FormatText(pInstigator:GetName() or "Unknown", NOTIF_COLORS.blue, true)
 	})
+
+	eCauser:AddScore(100)
 
 	Timer.SetTimeout(function()
 		if (eCharacter and eCharacter:IsValid() and eCharacter:GetStuned()) then

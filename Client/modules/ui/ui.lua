@@ -2,7 +2,7 @@ local bLeaderboardOpen = false
 
 local uiMainUI = WebUI(
 	"SNX Steal The Hat UI",
-	"http://localhost:5173",
+	"file://UI/dist/index.html",
 	WidgetVisibility.Visible,
 	true,
 	true
@@ -26,13 +26,13 @@ Timer.SetInterval(function()
 		})
 	end
 
-	for i = 0, 10 do
-		table.insert(tLeaderboard, {
-			sName = "Test " .. i,
-			nScore = i * 100,
-			bHasHat = false
-		})
-	end
+	-- for i = 0, 10 do
+	-- 	table.insert(tLeaderboard, {
+	-- 		sName = "Test " .. i,
+	-- 		nScore = i * 100,
+	-- 		bHasHat = false
+	-- 	})
+	-- end
 
 	local tDeck = eCharacter:GetDeck()
 	local tPerk = eCharacter:GetCurrentPerk()
