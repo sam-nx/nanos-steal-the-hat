@@ -1,8 +1,13 @@
+SNX = SNX or {}
+SNX.StealTheHat = SNX.StealTheHat or {}
+SNX.StealTheHat.UI = SNX.StealTheHat.UI or {}
+
 local bLeaderboardOpen = false
 
-local uiMainUI = WebUI(
+SNX.StealTheHat.UI.uiMainUI = WebUI(
 	"SNX Steal The Hat UI",
-	"file://UI/dist/index.html",
+	"http://localhost:5173",
+	-- "file://UI/dist/index.html",
 	WidgetVisibility.Visible,
 	true,
 	true
@@ -12,18 +17,21 @@ Timer.SetInterval(function()
 	local pLocal = Client.GetLocalPlayer()
 	---@type STHCharacter
 	local eCharacter = pLocal:GetControlledCharacter()
+	if (not eCharacter) then return end
 	local tLeaderboard = {}
 
 	---@param pPlayer Player
 	for _, pPlayer in ipairs(Player.GetAll()) do
 		---@type STHCharacter
 		local ePlayerCharacter = pPlayer:GetControlledCharacter()
-		table.insert(tLeaderboard, {
-			["sName"] = pPlayer:GetName(),
-			["nScore"] = ePlayerCharacter:GetScore(),
-			["bHasHat"] = ePlayerCharacter:GetHasHat(),
-			["bLocalPlayer"] = pLocal == pPlayer
-		})
+		if (ePlayerCharacter and ePlayerCharacter:IsA(STHCharacter)) then
+			table.insert(tLeaderboard, {
+				["sName"] = pPlayer:GetName(),
+				["nScore"] = ePlayerCharacter:GetScore(),
+				["bHasHat"] = ePlayerCharacter:GetHasHat(),
+				["bLocalPlayer"] = pLocal == pPlayer
+			})
+		end
 	end
 
 	-- for i = 0, 10 do
@@ -45,36 +53,39 @@ Timer.SetInterval(function()
 	end
 
 	local nPerkTimeLeft = eCharacter:GetValue("SNX::STH::Perks::nCurrentPerkTimeLeft", 0)
+	local nTimeLeft = math.floor((SNX.StealTheHat.Data.nMATCH_PHASE_END - Client.GetTime()) / 1000)
 
-	uiMainUI:CallEvent("SNX::STH::MatchHUD::SyncData", {
+	SNX.StealTheHat.UI.uiMainUI:CallEvent("SNX::STH::MatchHUD::SyncData", {
 		["nHealth"] = eCharacter:GetHealth(),
 		["nMaxHealth"] = eCharacter:GetMaxHealth(),
 		["nScore"] = eCharacter:GetScore(),
 		["nPRScore"] = eCharacter:GetPRScore(),
-		["nTimeLeft"] = 72,
+		["nTimeLeft"] = (nTimeLeft < 0) and 0 or nTimeLeft,
 		["tLeaderboard"] = tLeaderboard,
 		["tDeck"] = tDeck,
 		["bShiftDeck"] = ((tDeck[1] and not tDeck[2] and tDeck[3]) or (not tDeck[1] and (tDeck[2] or tDeck[3]))) and true or
 			false,
 		["tCurrentPerk"] = tPerk,
-		["nPerkTimeLeft"] = math.floor((nPerkTimeLeft - Client.GetTime()) / 10) / 100
+		["nPerkTimeLeft"] = math.floor((nPerkTimeLeft - Client.GetTime()) / 10) / 100,
+		["bHasHat"] = eCharacter:GetHasHat()
 	})
 end, 100)
 
 ---@param nScore number
 Events.SubscribeRemote("SNX::STH::UI::AddScore", function(nScore)
-	uiMainUI:CallEvent("SNX::STH::MatchHUD::AddScore", nScore)
+	SNX.StealTheHat.UI.uiMainUI:CallEvent("SNX::STH::MatchHUD::AddScore", nScore)
 end)
 
 ---@param tData { sText: string, sClass: string }[]
 Events.Subscribe("SNX::STH::UI::AddNotification", function(tData)
-	uiMainUI:CallEvent("SNX::STH::MatchHUD::AddNotification", tData)
+	SNX.StealTheHat.UI.uiMainUI:CallEvent("SNX::STH::MatchHUD::AddNotification", tData)
 end)
 
 Input.Subscribe("KeyDown", function(sKey)
 	if (sKey ~= "Tab") then return end
+	if (SNX.StealTheHat.Data.nGAME_PHASE ~= 1) then return end
 	if (not bLeaderboardOpen) then
-		uiMainUI:CallEvent("SNX::STH::MatchHUD::ToggleLeaderboard", true)
+		SNX.StealTheHat.UI.uiMainUI:CallEvent("SNX::STH::MatchHUD::ToggleLeaderboard", true)
 		Input.SetMouseEnabled(true)
 		bLeaderboardOpen = true
 	end
@@ -82,8 +93,9 @@ end)
 
 Input.Subscribe("KeyUp", function(sKey)
 	if (sKey ~= "Tab") then return end
+	if (SNX.StealTheHat.Data.nGAME_PHASE ~= 1) then return end
 	if (bLeaderboardOpen) then
-		uiMainUI:CallEvent("SNX::STH::MatchHUD::ToggleLeaderboard", false)
+		SNX.StealTheHat.UI.uiMainUI:CallEvent("SNX::STH::MatchHUD::ToggleLeaderboard", false)
 		Input.SetMouseEnabled(false)
 		bLeaderboardOpen = false
 	end
