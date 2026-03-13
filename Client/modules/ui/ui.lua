@@ -6,8 +6,8 @@ local bLeaderboardOpen = false
 
 SNX.StealTheHat.UI.uiMainUI = WebUI(
 	"SNX Steal The Hat UI",
-	"http://localhost:5173",
-	-- "file://UI/dist/index.html",
+	-- "http://localhost:5173",
+	"file://UI/dist/index.html",
 	WidgetVisibility.Visible,
 	true,
 	true
